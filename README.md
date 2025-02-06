@@ -60,14 +60,14 @@ Para cambiar la dimensión de la matriz, haz clic en el botón Volver.
 ## Estructura del proyecto
 El proyecto está organizado de la siguiente manera:
 
-/proyecto
-│
-├── main.py                  # Código principal del programa
-│
-└── IMAGES/                  # Carpeta con imágenes utilizadas en la interfaz
-    ├── numeros.jpg          # Imagen de fondo de la ventana principal
-    ├── matriz-2x2-2.jpg     # Imagen de ejemplo para matriz 2x2
-    └── matriz-3x3.jpg       # Imagen de ejemplo para matriz 3x3
+/proyecto<br>
+│<br>
+├── main.py                # Código principal del programa<br>
+│<br>
+└── IMAGES/                # Carpeta con imágenes utilizadas en la interfaz<br>
+    ├── numeros.jpg         # Imagen de fondo de la ventana principal<br>
+    ├── matriz-2x2-2.jpg     # Imagen de ejemplo para matriz 2x2<br>
+    └── matriz-3x3.jpg       # Imagen de ejemplo para matriz 3x3<br>
 
 ## Ejemplos de uso
 Matriz 2x2
