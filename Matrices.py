@@ -16,11 +16,164 @@ def numero(num):
     else:
         return f"+ {num}"
 def polinomio_caracteristico ():
-    pass
+    global valida
+    global ventana
+    if valida == 2:
+        vn2 = ventana
+        global listaMatriz_2
+        for entry in listaMatriz_2:
+            if not entry.get():
+                messagebox.showerror("Error", "Complete todos los datos.")
+                return
+            elif not is_float(entry.get()) :
+                messagebox.showerror("Error", "Se ingresa solo numeros.")
+                return
+        x1 = float(listaMatriz_2[0].get())
+        y1 = float(listaMatriz_2[1].get())
+        x2 = float(listaMatriz_2[2].get())
+        y2 = float(listaMatriz_2[3].get())   
+        q = round((-x1 -y2),2)
+        r = round((x1 * y2) - (y1 * x2),2)
+        labelpoli2 = tk.Label(vn2, text =f" λ^2  {numero(q)}λ  {numero(r)} ",width=30,height=2)
+        labelpoli2.place(x=200,y=160)
+        return labelpoli2
+    else:
+        vn3 = ventana
+        global listaMatriz_3
+        for entry in listaMatriz_3:
+            if not entry.get():
+                messagebox.showerror("Error", "Complete todos los datos.")
+                return
+            elif not is_float(entry.get()) :
+                messagebox.showerror("Error", "Se ingresa solo numeros.")
+                return
+        x1 = float(listaMatriz_3[0].get())
+        y1 = float(listaMatriz_3[1].get())
+        z1 = float(listaMatriz_3[2].get())
+        x2 = float(listaMatriz_3[3].get())
+        y2 = float(listaMatriz_3[4].get())
+        z2 = float(listaMatriz_3[5].get())
+        x3 = float(listaMatriz_3[6].get())
+        y3 = float(listaMatriz_3[7].get())
+        z3 = float(listaMatriz_3[8].get())
+        p1 = round(x1 + z3 + y2, 2)
+        p2 = round(y3*z2 -(y2*z3) - (y2*x1) - (z3*x1) + x2*y1 + x3*z1, 2)
+        p3 = round(x1*y2*z3 - y3*z2*x1 - y1*x2*z3 + x3*z2*y1 + z1*x2*y3 - x3*y2*z1, 2)
+        ecuacion = f" -λ^3  {numero(p1)}λ^2  {numero(p2)}λ  {numero(p3)} "
+        labelpoli3 = tk.Label(vn3, text =ecuacion,width=30,height=2)
+        labelpoli3.place(x=200,y=180)
+        return labelpoli3
 def valores_propios():
-    pass
+    global valida
+    global ventana
+    if valida == 2:
+        vn2 = ventana
+        global listaMatriz_2
+        for entry in listaMatriz_2:
+            if not entry.get():
+                messagebox.showerror("Error", "Complete todos los datos.")
+                return
+            elif not is_float(entry.get()) :
+                messagebox.showerror("Error", "Se ingresa solo numeros.")
+                return
+        x1 = float(listaMatriz_2[0].get())
+        y1 = float(listaMatriz_2[1].get())
+        x2 = float(listaMatriz_2[2].get())
+        y2 = float(listaMatriz_2[3].get())   
+        matriz= np.array([[x1, y1],
+                          [x2, y2]]) 
+        valores_propios = np.linalg.eigvals(matriz)
+        almacena =""
+        for valor in valores_propios:
+            almacena = f" {almacena}  {round(valor, 2)} ;"
+        labelvalores2 = tk.Label(vn2, text = almacena ,width=30,height=2)
+        labelvalores2.place(x=200,y=220)
+        return labelvalores2
+    else:
+        vn3 = ventana
+        global listaMatriz_3
+        for entry in listaMatriz_3:
+            if not entry.get():
+                messagebox.showerror("Error", "Complete todos los datos.")
+                return
+            elif not is_float(entry.get()) :
+                messagebox.showerror("Error", "Se ingresa solo numeros.")
+                return
+        x1 = float(listaMatriz_3[0].get())
+        y1 = float(listaMatriz_3[1].get())
+        z1 = float(listaMatriz_3[2].get())
+        x2 = float(listaMatriz_3[3].get())
+        y2 = float(listaMatriz_3[4].get())
+        z2 = float(listaMatriz_3[5].get())
+        x3 = float(listaMatriz_3[6].get())
+        y3 = float(listaMatriz_3[7].get())
+        z3 = float(listaMatriz_3[8].get())
+        matriz = np.array([[x1, y1, z1],
+                           [x2, y2, z2],
+                           [x3, y3, z3]])
+        valores_propios = np.linalg.eigvals(matriz)
+        almacena = ""
+        for valor in valores_propios:
+            almacena = f" {almacena} {round(valor)} ;"
+        labelvalores3 = tk.Label(vn3, text = almacena,width=30,height=2)
+        labelvalores3.place(x=200,y=240) 
+        return labelvalores3      
 def vectores_propios():
-    pass
+    global valida
+    global ventana
+    if valida == 2:
+        vn2 = ventana
+        global listaMatriz_2
+        for entry in listaMatriz_2:
+            if not entry.get():
+                messagebox.showerror("Error", "Complete todos los datos.")
+                return
+            elif not is_float(entry.get()):
+                messagebox.showerror("Error", "Se ingresa solo números.")
+                return
+        x1 = float(listaMatriz_2[0].get())
+        y1 = float(listaMatriz_2[1].get())
+        x2 = float(listaMatriz_2[2].get())
+        y2 = float(listaMatriz_2[3].get())
+        matriz = np.array([[x1, y1],
+                           [x2, y2]])
+        valores_propios, vectores_propios = np.linalg.eig(matriz)
+        almacena = ""
+        for i in range(len(vectores_propios)):
+            vector = vectores_propios[:, i]
+            almacena += f"Vector {i + 1}: {vector}\n"
+
+        labelVectores2 = tk.Label(vn2, text=almacena, width=40, height=3)
+        labelVectores2.place(x=200, y=280)
+    else:
+        vn3 = ventana
+        global listaMatriz_3
+        for entry in listaMatriz_3:
+            if not entry.get():
+                messagebox.showerror("Error", "Complete todos los datos.")
+                return
+            elif not is_float(entry.get()):
+                messagebox.showerror("Error", "Se ingresa solo números.")
+                return
+        x1 = float(listaMatriz_3[0].get())
+        y1 = float(listaMatriz_3[1].get())
+        z1 = float(listaMatriz_3[2].get())
+        x2 = float(listaMatriz_3[3].get())
+        y2 = float(listaMatriz_3[4].get())
+        z2 = float(listaMatriz_3[5].get())
+        x3 = float(listaMatriz_3[6].get())
+        y3 = float(listaMatriz_3[7].get())
+        z3 = float(listaMatriz_3[8].get())
+        matriz = np.array([[x1, y1, z1],
+                           [x2, y2, z2],
+                           [x3, y3, z3]])
+        valores_propios, vectores_propios = np.linalg.eig(matriz)
+        almacena = ""
+        for i in range(len(vectores_propios)):
+            vector = vectores_propios[:, i]
+            almacena += f"Vector {i + 1}: {vector}\n"
+        labelvectores3 = tk.Label(vn3, text=almacena, width=50, height=5)
+        labelvectores3.place(x=185, y=300)
 def limpiar_campos2():
     for entry in listaMatriz_2:
         entry.delete(0, 'end')
