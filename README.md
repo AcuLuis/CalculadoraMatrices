@@ -1,100 +1,164 @@
-# Calculadora de Matrices: Polinomio Característico, Valores Propios y Vectores Propios
+# Calculadora de Matrices
 
-Este programa es una calculadora de matrices que permite calcular el **polinomio característico**, los **valores propios** y los **vectores propios** de matrices cuadradas de dimensiones 2x2 y 3x3. Está desarrollado en Python utilizando las bibliotecas `tkinter` para la interfaz gráfica y `numpy` para los cálculos matemáticos.
+Aplicacion de escritorio para el calculo de propiedades de matrices cuadradas (2x2 y 3x3).
+Desarrollada en Python con interfaz grafica basada en Tkinter y calculos numericos con NumPy.
 
 ---
 
-## Características
+## Descripcion
 
-- **Interfaz gráfica intuitiva**: Permite ingresar los valores de la matriz de manera sencilla.
-- **Cálculos precisos**:
-  - Polinomio característico.
-  - Valores propios.
-  - Vectores propios.
-- **Soporte para matrices**:
-  - Matrices 2x2.
-  - Matrices 3x3.
-- **Validación de entradas**: Asegura que los datos ingresados sean números válidos.
-- **Botón de limpieza**: Permite borrar los campos para ingresar nuevos valores.
-- **Botón de volver**: Regresa a la ventana principal para seleccionar otra dimensión de matriz.
+Este programa permite ingresar los coeficientes de una matriz cuadrada y calcular
+las siguientes propiedades de algebra lineal:
+
+- Polinomio caracteristico P(lambda)
+- Valores propios (eigenvalues)
+- Vectores propios (eigenvectors)
+- Determinante
+- Matriz inversa (cuando existe)
+- Transpuesta
+- Rango
+- Traza
+
+Soporta matrices de dimension 2x2 y 3x3. Incluye la opcion de calcular todas
+las propiedades de forma simultanea.
 
 ---
 
 ## Requisitos
 
-Para ejecutar este programa, necesitas tener instalado:
+| Componente | Version minima |
+|------------|---------------|
+| Python     | 3.8+          |
+| NumPy      | 1.20+         |
 
-- **Python 3.x**: Puedes descargarlo desde [python.org](https://www.python.org/).
-- **Bibliotecas requeridas**:
-  - `tkinter`: Normalmente viene incluida con Python.
-  - `numpy`: Para cálculos matemáticos.
-  - `Pillow`: Para manejar imágenes en la interfaz gráfica.
+Tkinter viene incluido en la instalacion estandar de Python en Windows.
+En distribuciones Linux puede requerir instalacion separada (`python3-tk`).
 
-Puedes instalar las bibliotecas necesarias ejecutando el siguiente comando:
-`bash pip install numpy pillow`
+### Instalacion de dependencias
 
-## Instrucciones de uso
-1. **Ejecuta el programa**:
-- **Abre una terminal o línea de comandos.**
-- **Navega hasta la carpeta donde se encuentra el archivo del programa**.**
-- **Ejecuta el siguiente comando: python Matrices.py**
+```bash
+pip install numpy
+```
 
-2. **Selecciona la dimensión de la matriz**:
-En la ventana principal, elige entre 2x2 o 3x3 según la dimensión de la matriz que deseas calcular.
+---
 
-3. **Ingresa los valores de la matriz**:
-Completa los campos con los valores de la matriz.
-Asegúrate de ingresar solo números.
+## Ejecucion
 
-4. **Realiza los cálculos**:
-Haz clic en los botones correspondientes para calcular:
-- **Polinomio Característico**.
-- **Valores Propios**.
-- **Vectores Propios**.
-5. **Limpia los campos**:
-Si deseas ingresar una nueva matriz, haz clic en el botón Limpiar.
+```bash
+python Matrices.py
+```
 
-6. **Volver al menú principal**:
-Para cambiar la dimensión de la matriz, haz clic en el botón Volver.
+La aplicacion abrira una ventana principal donde se selecciona la dimension
+de la matriz (2x2 o 3x3). Al seleccionar una dimension, se abre una ventana
+secundaria con el formulario de entrada y el panel de resultados.
+
+---
+
+## Uso
+
+1. Seleccionar la dimension de la matriz en la ventana principal.
+2. Ingresar los valores numericos en la cuadricula de entrada.
+3. Seleccionar el calculo deseado mediante los botones individuales, o
+   presionar "Calcular Todo" (tambien con la tecla Enter) para obtener
+   todos los resultados.
+4. Usar "Limpiar" (Ctrl+L) para reiniciar los campos.
+5. Usar "Volver" (Esc) para regresar a la seleccion de dimension.
+
+### Atajos de teclado
+
+| Atajo   | Accion                        |
+|---------|-------------------------------|
+| Enter   | Calcular todas las propiedades |
+| Ctrl+L  | Limpiar campos y resultados   |
+| Esc     | Volver al menu principal      |
+
+---
 
 ## Estructura del proyecto
-El proyecto está organizado de la siguiente manera:
 
-/proyecto<br>
-│<br>
-├── main.py                # Código principal del programa<br>
-│<br>
-└── IMAGES/                # Carpeta con imágenes utilizadas en la interfaz<br>
-    ├── numeros.jpg         # Imagen de fondo de la ventana principal<br>
-    ├── matriz-2x2-2.jpg     # Imagen de ejemplo para matriz 2x2<br>
-    └── matriz-3x3.jpg       # Imagen de ejemplo para matriz 3x3<br>
+```
+CalculadoraMatrices/
+├── Matrices.py        # Codigo fuente principal (logica y GUI)
+├── README.md          # Documentacion del proyecto
+└── IMAGES/            # Recursos graficos de referencia
+    ├── numeros.jpg
+    ├── matriz-2x2-2.jpg
+    └── matriz-3x3.jpg
+```
 
-## Ejemplos de uso
-Matriz 2x2
-- **Ingresa los valores de la matriz**:
-x1 = 1, y1 = 2
-x2 = 3, y2 = 4
+---
 
-- **Resultados**:
+## Arquitectura del codigo
 
-Polinomio característico: λ^2 - 5λ - 2
+El programa esta organizado en los siguientes componentes:
 
-Valores propios: 5.37, -0.37
+### Funciones de calculo
 
-Vectores propios: [0.82, 0.58], [-0.82, 0.58]
+Funciones puras sin dependencia de la interfaz grafica:
 
-Matriz 3x3
-- **Ingresa los valores de la matriz**:
+- `formatear_polinomio()` — Genera la representacion en texto del polinomio
+  caracteristico con superindices Unicode.
+- `formatear_numero_complejo()` — Formatea numeros reales y complejos.
+- `formatear_matriz()` — Representa una matriz NumPy como texto alineado.
+- `calcular_valores_propios()` — Wrapper sobre `numpy.linalg.eigvals`.
+- `calcular_vectores_propios()` — Wrapper sobre `numpy.linalg.eig`.
+- `calcular_determinante()` — Wrapper sobre `numpy.linalg.det`.
+- `calcular_inversa()` — Calcula la inversa o retorna `None` si es singular.
+- `calcular_rango()` — Wrapper sobre `numpy.linalg.matrix_rank`.
+- `calcular_traza()` — Wrapper sobre `numpy.trace`.
 
-x1 = 1, y1 = 2, z1 = 3
-x2 = 4, y2 = 5, z2 = 6
-x3 = 7, y3 = 8, z3 = 9
+### Clases de interfaz
 
-- **Resultados**:
+- `ScrollableFrame` — Frame con scroll vertical para el panel de resultados.
+- `VentanaMatriz` — Ventana secundaria con la cuadricula de entrada, botones
+  de calculo y panel de resultados para una dimension N x N.
+- `CalculadoraApp` — Ventana principal con la seleccion de dimension.
 
-Polinomio característico: -λ^3 + 15λ^2 + 18λ
-Valores propios: 16.12, -1.12, 0
-Vectores propios: [0.23, 0.53, 0.82], [-0.82, 0.58, 0.82], [0.23, -0.53, 0.82]
+---
+
+## Ejemplo
+
+### Matriz 2x2
+
+Entrada:
+
+```
+| 1  2 |
+| 3  4 |
+```
+
+Resultados:
+
+| Propiedad                | Valor                              |
+|--------------------------|-------------------------------------|
+| Polinomio caracteristico | lambda^2 - 5*lambda - 2             |
+| Valores propios          | lambda_1 = 5.3723, lambda_2 = -0.3723 |
+| Determinante             | det(A) = -2                         |
+| Rango                    | rango(A) = 2                        |
+| Traza                    | tr(A) = 5                           |
+
+### Matriz 3x3
+
+Entrada:
+
+```
+| 1  2  3 |
+| 4  5  6 |
+| 7  8  9 |
+```
+
+Resultados:
+
+| Propiedad                | Valor                                          |
+|--------------------------|-------------------------------------------------|
+| Polinomio caracteristico | lambda^3 - 15*lambda^2 - 18*lambda              |
+| Valores propios          | lambda_1 = 16.1168, lambda_2 = -1.1168, lambda_3 = 0 |
+| Determinante             | det(A) = 0                                      |
+| Rango                    | rango(A) = 2                                    |
+| Traza                    | tr(A) = 15                                      |
+
+---
 
 ## Licencia
-Este proyecto está bajo la licencia MIT. Consulta el archivo `LICENSE` para más detalles.
+
+Este proyecto esta bajo la licencia MIT.
