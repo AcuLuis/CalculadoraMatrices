@@ -1,6 +1,6 @@
 # Calculadora de Matrices
 
-Aplicacion de escritorio para el calculo de propiedades de matrices cuadradas (2x2 y 3x3).
+Aplicacion de escritorio para el calculo de propiedades de matrices cuadradas (de 2x2 a 6x6).
 Desarrollada en Python con interfaz grafica basada en Tkinter y calculos numericos con NumPy.
 
 ---
@@ -10,17 +10,24 @@ Desarrollada en Python con interfaz grafica basada en Tkinter y calculos numeric
 Este programa permite ingresar los coeficientes de una matriz cuadrada y calcular
 las siguientes propiedades de algebra lineal:
 
-- Polinomio caracteristico P(lambda)
-- Valores propios (eigenvalues)
-- Vectores propios (eigenvectors)
+- Polinomio caracteristico P(lambda) = det(lambda I - A)
+- Valores propios (eigenvalues), con su multiplicidad
+- Vectores propios (eigenvectors), escalados para leerse facilmente (por ejemplo `[1, 2]`
+  en lugar de `[0.4472, 0.8944]`)
 - Determinante
-- Matriz inversa (cuando existe)
+- Matriz inversa (cuando existe), con aviso si la matriz esta mal condicionada
 - Transpuesta
 - Rango
 - Traza
 
-Soporta matrices de dimension 2x2 y 3x3. Incluye la opcion de calcular todas
-las propiedades de forma simultanea.
+Detecta los casos especiales en lugar de mostrar resultados enganosos:
+
+- Matrices singulares: se decide por el rango, no comparando el determinante con un
+  umbral fijo (asi `1e-6 * I` se reconoce como invertible).
+- Matrices no diagonalizables: se muestran solo los vectores propios independientes
+  y se indica que la matriz no es diagonalizable.
+- Ruido numerico: nunca se muestra `-0`, y los resultados de matrices enteras
+  (determinante, polinomio) se muestran como enteros exactos.
 
 ---
 
@@ -30,6 +37,7 @@ las propiedades de forma simultanea.
 |------------|---------------|
 | Python     | 3.8+          |
 | NumPy      | 1.20+         |
+| pytest     | (solo para los tests) |
 
 Tkinter viene incluido en la instalacion estandar de Python en Windows.
 En distribuciones Linux puede requerir instalacion separada (`python3-tk`).
@@ -38,6 +46,7 @@ En distribuciones Linux puede requerir instalacion separada (`python3-tk`).
 
 ```bash
 pip install numpy
+pip install pytest   # opcional, para ejecutar los tests
 ```
 
 ---
@@ -48,29 +57,48 @@ pip install numpy
 python Matrices.py
 ```
 
-La aplicacion abrira una ventana principal donde se selecciona la dimension
-de la matriz (2x2 o 3x3). Al seleccionar una dimension, se abre una ventana
-secundaria con el formulario de entrada y el panel de resultados.
-
 ---
 
 ## Uso
 
-1. Seleccionar la dimension de la matriz en la ventana principal.
-2. Ingresar los valores numericos en la cuadricula de entrada.
-3. Seleccionar el calculo deseado mediante los botones individuales, o
-   presionar "Calcular Todo" (tambien con la tecla Enter) para obtener
-   todos los resultados.
-4. Usar "Limpiar" (Ctrl+L) para reiniciar los campos.
-5. Usar "Volver" (Esc) para regresar a la seleccion de dimension.
+1. Elegir la dimension (2x2 a 6x6) en la barra superior. Al cambiarla se conservan
+   los valores que caben.
+2. Escribir los valores en la cuadricula. Se aceptan:
+   - coma o punto decimal: `0,5` o `0.5`
+   - fracciones: `1/2`, `-3/4`
+   - notacion cientifica: `1e3`
+3. Pulsar "Calcular todo" (Enter) o el boton de una operacion concreta. Los botones
+   individuales agregan su resultado sin borrar los demas.
+4. Al editar la matriz, los resultados visibles se recalculan automaticamente. Si
+   alguna celda es invalida, los resultados se atenuan y se avisa de que no
+   corresponden a los datos actuales.
+
+Otras funciones:
+
+- **Pegar una matriz** (Ctrl+V en una celda): desde Excel u hojas de calculo, o como
+  texto (`1 2; 3 4`, `[[1, 2], [3, 4]]`, salida de NumPy). Si es cuadrada y se pega
+  en la primera celda, la dimension se ajusta sola; si no, se pega como bloque a
+  partir de la celda seleccionada.
+- **Ejemplos**: identidad, matriz aleatoria y ejemplos ilustrativos (singular,
+  simetrica, valor propio repetido, no diagonalizable, valores propios complejos).
+- **Celdas vacias = 0**: si esta activado, las celdas vacias cuentan como cero (y se
+  indica cuantas). Si no, se marcan como error.
+- **Errores en la propia celda**: las celdas invalidas se marcan en rojo y bajo la
+  cuadricula se explica el problema de cada una, sin ventanas emergentes.
+- **Copiar**: cada resultado tiene su boton "Copiar"; "Copiar resultados" copia la
+  matriz y todos los resultados. Las matrices copiadas se pueden volver a pegar.
+- **Cerrar resultados**: el boton de cada tarjeta la quita del panel.
 
 ### Atajos de teclado
 
-| Atajo   | Accion                        |
-|---------|-------------------------------|
-| Enter   | Calcular todas las propiedades |
-| Ctrl+L  | Limpiar campos y resultados   |
-| Esc     | Volver al menu principal      |
+| Atajo          | Accion                                  |
+|----------------|-----------------------------------------|
+| Enter          | Calcular todas las propiedades          |
+| Flechas        | Moverse entre celdas                    |
+| Ctrl+V         | Pegar una matriz                        |
+| Ctrl+2 ... Ctrl+6 | Cambiar la dimension                 |
+| Ctrl+Shift+C   | Copiar la matriz y todos los resultados |
+| Ctrl+L         | Limpiar campos y resultados             |
 
 ---
 
@@ -78,9 +106,12 @@ secundaria con el formulario de entrada y el panel de resultados.
 
 ```
 CalculadoraMatrices/
-├── Matrices.py        # Codigo fuente principal (logica y GUI)
-├── README.md          # Documentacion del proyecto
-└── IMAGES/            # Recursos graficos de referencia
+├── Matrices.py          # Interfaz grafica (punto de entrada)
+├── calculos.py          # Logica: calculos, interpretacion de entradas y formato
+├── tests/
+│   └── test_calculos.py # Tests de la logica
+├── README.md            # Documentacion del proyecto
+└── IMAGES/              # Recursos graficos de referencia
     ├── numeros.jpg
     ├── matriz-2x2-2.jpg
     └── matriz-3x3.jpg
@@ -90,29 +121,59 @@ CalculadoraMatrices/
 
 ## Arquitectura del codigo
 
-El programa esta organizado en los siguientes componentes:
+### `calculos.py` (sin dependencia de la interfaz)
 
-### Funciones de calculo
+Interpretacion de entradas:
 
-Funciones puras sin dependencia de la interfaz grafica:
+- `parsear_valor()` — Convierte el texto de una celda en numero (coma decimal,
+  fracciones, signo menos Unicode). Rechaza `nan`, `inf` y textos no numericos con un
+  mensaje legible.
+- `parsear_texto_matriz()` — Interpreta texto pegado como filas de celdas.
 
-- `formatear_polinomio()` — Genera la representacion en texto del polinomio
-  caracteristico con superindices Unicode.
-- `formatear_numero_complejo()` — Formatea numeros reales y complejos.
-- `formatear_matriz()` — Representa una matriz NumPy como texto alineado.
-- `calcular_valores_propios()` — Wrapper sobre `numpy.linalg.eigvals`.
-- `calcular_vectores_propios()` — Wrapper sobre `numpy.linalg.eig`.
-- `calcular_determinante()` — Wrapper sobre `numpy.linalg.det`.
-- `calcular_inversa()` — Calcula la inversa o retorna `None` si es singular.
-- `calcular_rango()` — Wrapper sobre `numpy.linalg.matrix_rank`.
-- `calcular_traza()` — Wrapper sobre `numpy.trace`.
+Formato:
 
-### Clases de interfaz
+- `formatear_numero()` — Reales y complejos, sin `-0`, sin recortar cifras y con
+  notacion cientifica solo para valores muy pequenos o muy grandes.
+- `formatear_vector()`, `formatear_matriz()` (columnas alineadas),
+  `formatear_polinomio()` (superindices Unicode).
 
-- `ScrollableFrame` — Frame con scroll vertical para el panel de resultados.
-- `VentanaMatriz` — Ventana secundaria con la cuadricula de entrada, botones
-  de calculo y panel de resultados para una dimension N x N.
-- `CalculadoraApp` — Ventana principal con la seleccion de dimension.
+Calculos:
+
+- `calcular_polinomio()`, `calcular_determinante()`, `calcular_rango()`,
+  `calcular_traza()`.
+- `calcular_inversa()` — Devuelve `(inversa, numero de condicion)`; la inversa es
+  `None` si la matriz es singular.
+- `calcular_espacios_propios()` — Valores propios distintos con su multiplicidad
+  algebraica y una base de su espacio propio (calculada por forma escalonada, como a
+  mano). Agrupa los valores propios repetidos aunque NumPy los separe por error
+  numerico.
+
+Operaciones listas para mostrar:
+
+- `OPERACIONES` — Lista `(clave, etiqueta, funcion)` en orden canonico.
+- `calcular(matriz, claves)` — Devuelve una lista de `Resultado(clave, titulo,
+  texto, tipo)`, donde `tipo` es `"ok"`, `"aviso"` o `"error"`. Nunca lanza
+  excepciones.
+
+### `Matrices.py` (interfaz)
+
+- `ScrollableFrame` — Panel con scroll; la rueda del raton funciona sobre cualquier
+  elemento interior (Windows, macOS y Linux), y con Shift desplaza en horizontal.
+- `Tarjeta` — Muestra un `Resultado` con botones para copiarlo y cerrarlo.
+- `CalculadoraApp` — Ventana unica con la cuadricula de entrada, las operaciones y
+  los resultados.
+
+---
+
+## Tests
+
+```bash
+python -m pytest
+```
+
+Cubren el formato de numeros, la interpretacion de entradas y los calculos,
+incluidos los casos limite (matrices singulares, mal condicionadas, no
+diagonalizables y con valores propios complejos).
 
 ---
 
@@ -129,13 +190,14 @@ Entrada:
 
 Resultados:
 
-| Propiedad                | Valor                              |
-|--------------------------|-------------------------------------|
-| Polinomio caracteristico | lambda^2 - 5*lambda - 2             |
-| Valores propios          | lambda_1 = 5.3723, lambda_2 = -0.3723 |
-| Determinante             | det(A) = -2                         |
-| Rango                    | rango(A) = 2                        |
-| Traza                    | tr(A) = 5                           |
+| Propiedad                | Valor                                     |
+|--------------------------|-------------------------------------------|
+| Polinomio caracteristico | P(lambda) = lambda^2 - 5*lambda - 2       |
+| Valores propios          | lambda_1 = 5.3723, lambda_2 = -0.3723     |
+| Determinante             | det(A) = -2                               |
+| Inversa                  | [[-2, 1], [1.5, -0.5]]                    |
+| Rango                    | rango(A) = 2                              |
+| Traza                    | tr(A) = 5                                 |
 
 ### Matriz 3x3
 
@@ -149,13 +211,15 @@ Entrada:
 
 Resultados:
 
-| Propiedad                | Valor                                          |
-|--------------------------|-------------------------------------------------|
-| Polinomio caracteristico | lambda^3 - 15*lambda^2 - 18*lambda              |
-| Valores propios          | lambda_1 = 16.1168, lambda_2 = -1.1168, lambda_3 = 0 |
-| Determinante             | det(A) = 0                                      |
-| Rango                    | rango(A) = 2                                    |
-| Traza                    | tr(A) = 15                                      |
+| Propiedad                | Valor                                              |
+|--------------------------|----------------------------------------------------|
+| Polinomio caracteristico | P(lambda) = lambda^3 - 15*lambda^2 - 18*lambda     |
+| Valores propios          | lambda_1 = 16.1168, lambda_2 = 0, lambda_3 = -1.1168 |
+| Vector propio de lambda = 0 | v = [1, -2, 1]                                  |
+| Determinante             | det(A) = 0                                         |
+| Inversa                  | No tiene (la matriz es singular)                   |
+| Rango                    | rango(A) = 2                                       |
+| Traza                    | tr(A) = 15                                         |
 
 ---
 
