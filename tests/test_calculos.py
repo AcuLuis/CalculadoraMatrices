@@ -1,11 +1,15 @@
 import math
+from fractions import Fraction as F
 
 import numpy as np
 import pytest
 
 from calculos import (
     CLAVES,
+    CLAVES_CON_B,
+    CLAVES_TODO,
     calcular,
+    parsear_fraccion,
     calcular_determinante,
     calcular_espacios_propios,
     calcular_inversa,
@@ -233,10 +237,131 @@ def test_valores_complejos():
 def test_calcular_todo_sin_errores():
     for A in (EJEMPLO_2X2, EJEMPLO_3X3, np.zeros((4, 4)), np.eye(6)):
         resultados = calcular(A)
-        assert [r.clave for r in resultados] == CLAVES
+        assert [r.clave for r in resultados] == CLAVES_TODO
         assert all(r.tipo != "error" for r in resultados)
 
 
 def test_calcular_respeta_orden_canonico():
     resultados = calcular(EJEMPLO_2X2, ["traza", "polinomio"])
     assert [r.clave for r in resultados] == ["polinomio", "traza"]
+
+
+# ── Modo exacto y operaciones adicionales ────────────────────────────
+
+def _uno(A, clave, **kw):
+    (resultado,) = calcular(A, [clave], **kw)
+    return resultado
+
+
+def test_parsear_fraccion_es_exacto():
+    assert parsear_fraccion("1/3") == F(1, 3)
+    assert parsear_fraccion("0,1") == F(1, 10)
+    assert parsear_fraccion("-1.5e-1") == F(-3, 20)
+    assert parsear_fraccion("2/0,5") == 4
+
+
+def test_exacto_valores_con_radicales():
+    texto = _uno([[1, 2], [3, 4]], "valores", exacto=True).texto
+    assert texto == "λ₁ = (5 + √33)/2 ≈ 5.3723\nλ₂ = (5 - √33)/2 ≈ -0.3723"
+
+
+def test_exacto_fracciones():
+    A = [[F(1, 2), F(1, 3)], [F(1, 4), F(1, 5)]]
+    assert _uno(A, "determinante", exacto=True).texto == "det(A) = 1/60 ≈ 0.0167"
+    assert _uno(A, "polinomio", exacto=True).texto == "P(λ) = λ² − (7/10)λ + 1/60"
+    inversa = _uno([[1, 2], [3, 4]], "inversa", exacto=True).texto
+    assert inversa.startswith("[  -2     1 ]\n[ 3/2  -1/2 ]")
+    assert "correcta (exacta)" in inversa
+
+
+def test_exacto_vuelve_a_decimales_si_no_es_legible():
+    A = [[F("0.123456789"), 1], [1, 2]]
+    assert _uno(A, "determinante", exacto=True).texto == "det(A) = -0.7531"
+    assert "/" not in _uno(A, "inversa", exacto=True).texto
+
+
+def test_comprobacion_vectores():
+    assert "correcta (exacta)" in _uno([[3, 1, 1], [1, 3, 1], [1, 1, 3]], "vectores", exacto=True).texto
+    assert "Comprobación A·v = λ·v: correcta" in _uno(EJEMPLO_2X2, "vectores").texto
+
+
+def test_diagonalizacion():
+    r = _uno([[3, 1, 1], [1, 3, 1], [1, 1, 3]], "diagonalizacion", exacto=True)
+    assert r.tipo == "ok" and r.preformateado
+    assert "[ 1   1   1 ]\n[ 1  -1   0 ]\n[ 1   0  -1 ]" in r.texto
+    assert "[ 5  0  0 ]\n[ 0  2  0 ]\n[ 0  0  2 ]" in r.texto
+    assert "correcta (exacta)" in r.texto
+
+    r = _uno([[0, -1], [1, 0]], "diagonalizacion", exacto=True)
+    assert "Diagonalizable en ℂ" in r.texto
+
+    r = _uno([[1, 1], [0, 1]], "diagonalizacion", exacto=True)
+    assert r.tipo == "aviso" and "No es diagonalizable" in r.texto
+
+
+@pytest.mark.parametrize("exacto", [True, False])
+def test_escalonada(exacto):
+    r = _uno(EJEMPLO_3X3, "escalonada", exacto=exacto)
+    assert "Columna 3: sin pivote (variable libre)" in r.texto
+    assert r.texto.endswith("[ 1  0  -1 ]\n[ 0  1   2 ]\n[ 0  0   0 ]\n\n"
+                            "Columnas pivote: 1, 2   ·   rango = 2")
+    if exacto:
+        assert "F₂ → (-1/3)·F₂" in r.texto
+
+
+@pytest.mark.parametrize("exacto", [True, False])
+def test_propiedades(exacto):
+    def propiedades(A):
+        texto = _uno(A, "propiedades", exacto=exacto).texto
+        return dict(linea.rsplit("   ", 1) for linea in texto.splitlines())
+
+    rotacion = {k.strip(): v for k, v in propiedades([[0, -1], [1, 0]]).items()}
+    assert rotacion["Ortogonal (AᵀA = I)"] == "sí"
+    assert rotacion["Antisimétrica (Aᵀ = −A)"] == "sí"
+    assert rotacion["Diagonalizable"] == "sí (en ℂ)"
+
+    simetrica = {k.strip(): v for k, v in propiedades([[2, -1], [-1, 2]]).items()}
+    assert simetrica["Simétrica (Aᵀ = A)"] == "sí"
+    assert simetrica["Definida positiva"] == "sí"
+
+    proyeccion = {k.strip(): v for k, v in propiedades([[1, 0], [0, 0]]).items()}
+    assert proyeccion["Idempotente (A² = A)"] == "sí"
+    assert proyeccion["Invertible"] == "no"
+
+
+@pytest.mark.parametrize("exacto", [True, False])
+def test_potencia(exacto):
+    r = _uno([[1, 1], [1, 0]], "potencia", exponente=10, exacto=exacto)
+    assert r.titulo == "Potencia   A¹⁰"
+    assert r.texto == "[ 89  55 ]\n[ 55  34 ]"
+    r = _uno([[2, 1], [1, 1]], "potencia", exponente=-2, exacto=exacto)
+    assert r.texto == "[  2  -3 ]\n[ -3   5 ]"
+    assert _uno([[1, 2], [2, 4]], "potencia", exponente=-1, exacto=exacto).tipo == "aviso"
+    assert _uno([[1, 2], [3, 4]], "potencia", exponente=0, exacto=exacto).texto == "[ 1  0 ]\n[ 0  1 ]"
+
+
+@pytest.mark.parametrize("exacto", [True, False])
+def test_operaciones_con_b(exacto):
+    A, B = [[1, 2], [3, 4]], [[0, 1], [1, 0]]
+    textos = {r.clave: r.texto for r in calcular(A, CLAVES_CON_B, matriz_b=B, exacto=exacto)}
+    assert textos == {
+        "suma": "[ 1  3 ]\n[ 4  4 ]",
+        "resta": "[ 1  1 ]\n[ 2  4 ]",
+        "producto": "[ 2  1 ]\n[ 4  3 ]",
+        "producto_ba": "[ 3  4 ]\n[ 1  2 ]",
+    }
+    conmutan = _uno(A, "producto", matriz_b=[[2, 0], [0, 2]], exacto=exacto).texto
+    assert conmutan.endswith("A y B conmutan: A·B = B·A.")
+
+
+def test_operacion_con_b_sin_b():
+    assert _uno(EJEMPLO_2X2, "suma").tipo == "error"
+
+
+@pytest.mark.parametrize("exacto", [True, False])
+def test_todas_las_operaciones_sin_errores(exacto):
+    for A in (EJEMPLO_2X2, EJEMPLO_3X3, np.zeros((3, 3)), np.eye(4), [[0, -1], [1, 0]]):
+        n = len(A)
+        resultados = calcular(A, CLAVES, matriz_b=np.ones((n, n)), exponente=3, exacto=exacto)
+        assert [r.clave for r in resultados] == CLAVES
+        assert all(r.tipo != "error" for r in resultados), [r.texto for r in resultados if r.tipo == "error"]
